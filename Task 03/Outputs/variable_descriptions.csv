@@ -1,0 +1,17 @@
+variable,type,n_unique,example
+case_id,character,27034,CASE000005
+institution,factor,4,Institution_A
+sex,factor,2,Female
+age_at_test,numeric,98,1
+birth_year,numeric,103,2021
+bill_date,Date,3276,2023-06-10
+HB,numeric,203,8.7
+MCH,numeric,783,17.9
+MCHC,numeric,668,33.5
+MCV,numeric,991,53.6
+PCV,numeric,1810,26
+RBC,numeric,469,4.85
+who_hb_threshold,numeric,4,11
+anemia,factor,2,Yes
+anemia_severity,ordered,4,Moderate
+age_group,factor,8,"0-4 (Child, U5)"

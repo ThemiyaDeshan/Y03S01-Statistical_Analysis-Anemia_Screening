@@ -1,0 +1,8 @@
+variable,lower_fence,upper_fence,n_outliers,pct_outliers
+age_at_test,-29,107,0,0
+HB,7.5,17.1,295,1.09
+MCH,23.2,34.4,1327,4.91
+MCHC,29.75,36.55,863,3.19
+MCV,71.25,102.05,1235,4.57
+PCV,23.1,51.1,279,1.03
+RBC,2.76,5.88,391,1.45

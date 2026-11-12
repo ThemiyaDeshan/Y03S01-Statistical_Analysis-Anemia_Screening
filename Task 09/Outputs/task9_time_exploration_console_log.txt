@@ -1,0 +1,71 @@
+=========================================================
+TASK 9: TIME DIMENSION EXPLORATION (not time series analysis)
+=========================================================
+
+Date range: 2014-04-21 to 2023-08-11 
+N with valid bill_date: 27034 of 27034 (100%% complete)
+
+-- Case volume by year (pooled across institutions) --
+# A tibble: 10 × 2
+    year     n
+   <dbl> <int>
+ 1  2014  1310
+ 2  2015  2002
+ 3  2016  1278
+ 4  2017  3146
+ 5  2018  2998
+ 6  2019  3728
+ 7  2020  2637
+ 8  2021  3161
+ 9  2022  3902
+10  2023  2872
+
+-- CRITICAL FINDING: institution coverage is NOT consistent across years --
+# A tibble: 4 × 11
+  institution   `2023` `2015` `2016` `2017` `2018` `2019` `2020` `2021` `2022` `2014`
+  <fct>          <int>  <int>  <int>  <int>  <int>  <int>  <int>  <int>  <int>  <int>
+1 Institution_A    710      0      0      0      0      0      0      0      0      0
+2 Institution_B   1302    595   1278   3146   2624   2361   1756   2068   2522      0
+3 Institution_C      0   1407      0      0      0      0      0      0      0   1310
+4 Institution_D    860      0      0      0    374   1367    881   1093   1380      0
+
+This table shows each institution contributes data in DIFFERENT,
+largely NON-OVERLAPPING year ranges:
+  Institution_A: 2023 only
+  Institution_B: 2015-2023 (near-continuous, but with volume swings)
+  Institution_C: 2014-2015 only
+  Institution_D: 2018, 2020-2023 (missing 2014-2017, 2019)
+This means any pooled year-over-year trend would be confounded with
+institutions entering/leaving the sample, NOT a genuine underlying
+time trend in anaemia prevalence. This is the central data-quality
+limitation discussed in Task 9.
+
+-- Annual anaemia prevalence, POOLED across institutions (naive, misleading) --
+# A tibble: 10 × 3
+    year     n anemia_rate
+   <dbl> <int>       <dbl>
+ 1  2014  1310        51.4
+ 2  2015  2002        52.7
+ 3  2016  1278        30.4
+ 4  2017  3146        29.8
+ 5  2018  2998        37.4
+ 6  2019  3728        37.9
+ 7  2020  2637        43.3
+ 8  2021  3161        52.4
+ 9  2022  3902        49.9
+10  2023  2872        50.9
+
+-- Annual anaemia prevalence, Institution_B ONLY (the one institution --
+-- with near-continuous coverage, used as an illustrative comparison) --
+# A tibble: 9 × 3
+   year     n anemia_rate
+  <dbl> <int>       <dbl>
+1  2015   595        28.7
+2  2016  1278        30.4
+3  2017  3146        29.8
+4  2018  2624        36.2
+5  2019  2361        36.4
+6  2020  1756        45.5
+7  2021  2068        57  
+8  2022  2522        52.9
+9  2023  1302        62.6

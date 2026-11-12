@@ -1,0 +1,250 @@
+=========================================================
+TASK 5: PREDICTIVE STATISTICAL MODELLING - console output
+=========================================================
+
+Train n: 20275  Test n: 6759 
+Train anaemia rate: 0.4364  Test anaemia rate: 0.4356 
+
+
+---------------------------------------------------------
+MODEL 1: Logistic Regression (GLM, binomial) - Demographic only
+Predictors: age_at_test, sex
+---------------------------------------------------------
+
+Call:
+glm(formula = anemia ~ age_at_test + sex, family = binomial(link = "logit"), 
+    data = train)
+
+Coefficients:
+              Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -0.6821628  0.0328945  -20.74   <2e-16 ***
+age_at_test  0.0223802  0.0007016   31.90   <2e-16 ***
+sexMale     -1.0958935  0.0311155  -35.22   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 27779  on 20274  degrees of freedom
+Residual deviance: 25330  on 20272  degrees of freedom
+AIC: 25336
+
+Number of Fisher Scoring iterations: 4
+
+
+Odds ratios:
+(Intercept) age_at_test     sexMale 
+  0.5055225   1.0226326   0.3342408 
+
+95% CI (odds ratio scale):
+                2.5 %    97.5 %
+(Intercept) 0.4739086 0.5391338
+age_at_test 1.0212306 1.0240431
+sexMale     0.3144302 0.3552197
+
+---------------------------------------------------------
+MODEL 2: Logistic Regression (GLM, binomial) - Demographic + Labs
+Predictors: age_at_test, sex, MCH, MCHC, MCV, PCV, RBC
+(HB excluded - deterministic of the label; institution excluded - Task 1/4 justification)
+---------------------------------------------------------
+
+Call:
+glm(formula = anemia ~ age_at_test + sex + MCH + MCHC + MCV + 
+    PCV + RBC, family = binomial(link = "logit"), data = train)
+
+Coefficients:
+             Estimate Std. Error z value Pr(>|z|)    
+(Intercept) 65.255556   9.265795   7.043 1.89e-12 ***
+age_at_test  0.070105   0.001866  37.565  < 2e-16 ***
+sexMale      2.096831   0.079699  26.309  < 2e-16 ***
+MCH         -0.705675   0.274083  -2.575     0.01 *  
+MCHC        -1.041568   0.236399  -4.406 1.05e-05 ***
+MCV          0.447767   0.106491   4.205 2.61e-05 ***
+PCV         -1.819435   0.087052 -20.901  < 2e-16 ***
+RBC          3.190624   0.699389   4.562 5.07e-06 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 27779  on 20274  degrees of freedom
+Residual deviance:  6738  on 20267  degrees of freedom
+AIC: 6754
+
+Number of Fisher Scoring iterations: 8
+
+
+Odds ratios:
+ (Intercept)  age_at_test      sexMale          MCH         MCHC          MCV 
+2.188406e+28 1.072621e+00 8.140333e+00 4.937749e-01 3.529008e-01 1.564814e+00 
+         PCV          RBC 
+1.621174e-01 2.430359e+01 
+
+-- Multicollinearity check: Variance Inflation Factors (VIF) --
+age_at_test         sex         MCH        MCHC         MCV         PCV 
+   1.886231    1.401642  387.831095  106.521243  460.986165   40.488300 
+        RBC 
+  59.268184 
+
+---------------------------------------------------------
+MODEL 3: Logistic Regression - Demographic + Labs + age x sex interaction
+Justified by Task 4 Test G (significant two-way ANOVA interaction)
+---------------------------------------------------------
+
+Call:
+glm(formula = anemia ~ age_at_test * sex + MCH + MCHC + MCV + 
+    PCV + RBC, family = binomial(link = "logit"), data = train)
+
+Coefficients:
+                     Estimate Std. Error z value Pr(>|z|)    
+(Intercept)         73.050880  10.155956   7.193 6.34e-13 ***
+age_at_test          0.044617   0.002093  21.320  < 2e-16 ***
+sexMale             -0.977165   0.130932  -7.463 8.45e-14 ***
+MCH                 -1.146430   0.301615  -3.801 0.000144 ***
+MCHC                -1.033611   0.259311  -3.986 6.72e-05 ***
+MCV                  0.652975   0.117126   5.575 2.48e-08 ***
+PCV                 -2.310979   0.099328 -23.266  < 2e-16 ***
+RBC                  4.475949   0.767568   5.831 5.50e-09 ***
+age_at_test:sexMale  0.101209   0.003637  27.828  < 2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 27778.7  on 20274  degrees of freedom
+Residual deviance:  5739.2  on 20266  degrees of freedom
+AIC: 5757.2
+
+Number of Fisher Scoring iterations: 9
+
+
+-- Likelihood ratio test: Model 2 vs Model 3 (is interaction justified?) --
+Analysis of Deviance Table
+
+Model 1: anemia ~ age_at_test + sex + MCH + MCHC + MCV + PCV + RBC
+Model 2: anemia ~ age_at_test * sex + MCH + MCHC + MCV + PCV + RBC
+  Resid. Df Resid. Dev Df Deviance  Pr(>Chi)    
+1     20267     6738.0                          
+2     20266     5739.2  1   998.87 < 2.2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+-- Model comparison: AIC/BIC --
+Model 1 (demo only):        AIC=25336.3  BIC=25360.0
+Model 2 (demo+labs):        AIC=6754.0  BIC=6817.4
+Model 3 (demo+labs+inter):  AIC=5757.2  BIC=5828.4
+
+---------------------------------------------------------
+TEST-SET PERFORMANCE: Models 1-3
+---------------------------------------------------------
+
+[Model 1: Demographic only]
+         Actual
+Predicted   No  Yes
+      No  2852 1456
+      Yes  963 1488
+Accuracy=0.6421  Sensitivity(Recall)=0.5054  Specificity=0.7476  Precision=0.6071  AUC(approx)=0.6805
+
+[Model 2: Demographic + Labs]
+         Actual
+Predicted   No  Yes
+      No  3553  248
+      Yes  262 2696
+Accuracy=0.9245  Sensitivity(Recall)=0.9158  Specificity=0.9313  Precision=0.9114  AUC(approx)=0.9880
+
+[Model 3: Demographic + Labs + Interaction]
+         Actual
+Predicted   No  Yes
+      No  3622  187
+      Yes  193 2757
+Accuracy=0.9438  Sensitivity(Recall)=0.9365  Specificity=0.9494  Precision=0.9346  AUC(approx)=0.9855
+
+---------------------------------------------------------
+REGULARIZED MODELS: Ridge / LASSO / Elastic Net
+Same predictor set as Model 2, standardized internally by glmnet
+---------------------------------------------------------
+
+Ridge: lambda.min = 0.0344842  lambda.1se = 0.0344842 
+LASSO: lambda.min = 0.0002216669  lambda.1se = 0.00226883 
+Elastic Net (alpha=0.5): lambda.min = 6.896839e-05  lambda.1se = 0.0008502746 
+
+-- Ridge coefficients (lambda.min) --
+9 x 1 sparse Matrix of class "dgCMatrix"
+             lambda.min
+(Intercept) 37.12499583
+age_at_test  0.02329548
+sexFemale   -0.16875069
+sexMale      0.16822191
+MCH         -0.17505614
+MCHC        -0.39798153
+MCV         -0.02983330
+PCV         -0.25074789
+RBC         -1.93523968
+
+-- LASSO coefficients (lambda.min) -- (note which shrink to exactly zero)
+9 x 1 sparse Matrix of class "dgCMatrix"
+               lambda.min
+(Intercept)  1.000251e+02
+age_at_test  6.874799e-02
+sexFemale   -2.051696e+00
+sexMale      3.078287e-13
+MCH          .           
+MCHC        -1.626069e+00
+MCV          4.679101e-02
+PCV         -1.416769e+00
+RBC          .           
+
+-- Elastic Net coefficients (lambda.min) --
+9 x 1 sparse Matrix of class "dgCMatrix"
+             lambda.min
+(Intercept) 92.72256572
+age_at_test  0.06883482
+sexFemale   -1.05363182
+sexMale      1.00493735
+MCH         -0.11892046
+MCHC        -1.52322330
+MCV          0.11994307
+PCV         -1.49219640
+RBC          0.64327073
+
+[Ridge Regression (alpha=0)]
+         Actual
+Predicted   No  Yes
+      No  3587  312
+      Yes  228 2632
+Accuracy=0.9201  Sensitivity=0.8940  Specificity=0.9402  Precision=0.9203  AUC(approx)=0.9790
+
+[LASSO Regression (alpha=1)]
+         Actual
+Predicted   No  Yes
+      No  3554  252
+      Yes  261 2692
+Accuracy=0.9241  Sensitivity=0.9144  Specificity=0.9316  Precision=0.9116  AUC(approx)=0.9825
+
+[Elastic Net (alpha=0.5)]
+         Actual
+Predicted   No  Yes
+      No  3554  251
+      Yes  261 2693
+Accuracy=0.9242  Sensitivity=0.9147  Specificity=0.9316  Precision=0.9116  AUC(approx)=0.9830
+
+---------------------------------------------------------
+FINAL MODEL COMPARISON TABLE
+---------------------------------------------------------
+# A tibble: 6 × 6
+  Model                               Accuracy Sensitivity Specificity Precision
+  <chr>                                  <dbl>       <dbl>       <dbl>     <dbl>
+1 1. Logistic (Demographic only)         0.642       0.505       0.748     0.607
+2 2. Logistic (Demo+Labs)                0.925       0.916       0.931     0.911
+3 3. Logistic (Demo+Labs+Interaction)    0.944       0.936       0.949     0.935
+4 4. Ridge                               0.920       0.894       0.940     0.920
+5 5. LASSO                               0.924       0.914       0.932     0.912
+6 6. Elastic Net                         0.924       0.915       0.932     0.912
+  AUC_approx
+       <dbl>
+1      0.680
+2      0.988
+3      0.986
+4      0.979
+5      0.982
+6      0.983

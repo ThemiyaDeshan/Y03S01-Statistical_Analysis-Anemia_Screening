@@ -1,0 +1,79 @@
+=========================================================
+TASK 7: PCA CRITICAL EVALUATION - console output
+=========================================================
+
+Variables entering PCA: HB, MCH, MCHC, MCV, PCV, RBC 
+n = 27034 
+
+-- Correlation matrix (reference: same as Task 3 finding) --
+        HB    MCH   MCHC    MCV   PCV    RBC
+HB   1.000  0.408  0.314  0.299 0.955  0.782
+MCH  0.408  1.000  0.504  0.876 0.279 -0.239
+MCHC 0.314  0.504  1.000  0.028 0.023 -0.002
+MCV  0.299  0.876  0.028  1.000 0.312 -0.275
+PCV  0.955  0.279  0.023  0.312 1.000  0.822
+RBC  0.782 -0.239 -0.002 -0.275 0.822  1.000
+
+-- PCA summary: variance explained --
+Importance of components:
+                          PC1    PC2    PC3     PC4     PC5     PC6
+Standard deviation     1.7086 1.4323 1.0099 0.08212 0.04059 0.02855
+Proportion of Variance 0.4865 0.3419 0.1700 0.00112 0.00027 0.00014
+Cumulative Proportion  0.4865 0.8285 0.9985 0.99959 0.99986 1.00000
+
+-- Eigenvalues (variance of each PC) --
+  PC1   PC2   PC3   PC4   PC5   PC6 
+2.919 2.052 1.020 0.007 0.002 0.001 
+
+(Kaiser rule: retain components with eigenvalue > 1)
+Components with eigenvalue > 1: 3 
+
+-- Loadings (how original variables combine into each PC) --
+       PC1    PC2    PC3    PC4    PC5    PC6
+HB   0.574  0.123  0.065 -0.448  0.370 -0.560
+MCH  0.329 -0.576  0.028  0.268  0.582  0.385
+MCHC 0.191 -0.250  0.866  0.009 -0.388 -0.022
+MCV  0.276 -0.528 -0.449  0.213 -0.500 -0.386
+PCV  0.547  0.203 -0.201 -0.336 -0.352  0.618
+RBC  0.388  0.520  0.056  0.754  0.001 -0.085
+# A tibble: 6 × 4
+  PC    Eigenvalue Prop_Variance Cumulative_Variance
+  <chr>      <dbl>         <dbl>               <dbl>
+1 PC1     2.92          0.487                  0.487
+2 PC2     2.05          0.342                  0.828
+3 PC3     1.02          0.170                  0.998
+4 PC4     0.00674       0.00112                1.000
+5 PC5     0.00165       0.000275               1.000
+6 PC6     0.000815      0.000136               1    
+
+-- PC1 loadings sorted by magnitude --
+       HB       PCV       RBC       MCH       MCV      MCHC 
+0.5742861 0.5469264 0.3876073 0.3292337 0.2758033 0.1906966 
+
+-- PC2 loadings sorted by magnitude --
+      MCH       MCV       RBC      MCHC       PCV        HB 
+0.5763903 0.5279470 0.5198515 0.2500726 0.2028123 0.1230101 
+
+---------------------------------------------------------
+COMPARISON: Original-variable logistic regression vs PCA-based
+(Principal Component Regression / Logistic PCR)
+---------------------------------------------------------
+
+-- AIC comparison --
+Original variables (7 predictors): AIC = 6754.0
+First 2 PCs only (4 predictors):    AIC = 7402.2
+All 6 PCs (7 predictors, rotated):  AIC = 6633.5
+
+-- Test-set performance --
+[Original variables] Accuracy=0.9245 Sensitivity=0.9158 Specificity=0.9313 AUC(approx)=0.9825
+[First 2 PCs only] Accuracy=0.9188 Sensitivity=0.9042 Specificity=0.9300 AUC(approx)=0.9785
+[All 6 PCs] Accuracy=0.9259 Sensitivity=0.9175 Specificity=0.9324 AUC(approx)=0.9820
+
+-- Correlation among PC1-PC6 (should be ~0, confirming PCA removes multicollinearity) --
+    PC1 PC2 PC3 PC4 PC5 PC6
+PC1   1   0   0   0   0   0
+PC2   0   1   0   0   0   0
+PC3   0   0   1   0   0   0
+PC4   0   0   0   1   0   0
+PC5   0   0   0   0   1   0
+PC6   0   0   0   0   0   1

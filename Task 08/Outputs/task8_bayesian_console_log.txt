@@ -1,0 +1,158 @@
+=========================================================
+TASK 8: BAYESIAN STATISTICAL METHODS - console output
+=========================================================
+
+Train n: 20275  Test n: 6759 
+Predictors: age_at_test, sex, MCH, MCHC, MCV, PCV, RBC (same as Task 5 Model 2)
+
+
+---------------------------------------------------------
+A. NAIVE BAYES CLASSIFIER (e1071::naiveBayes)
+---------------------------------------------------------
+Assumption being tested: predictors are conditionally independent given class.
+We know from Task 3/5 this is VIOLATED (MCH-MCV r=0.88, HB-PCV r=0.96,
+MCV in our predictor set has VIF=461). This is a deliberate stress-test
+of Naive Bayes under known assumption violation.
+
+
+[Naive Bayes]
+         Actual
+Predicted   No  Yes
+      No  3397  372
+      Yes  418 2572
+Accuracy=0.8831 Sensitivity=0.8736 Specificity=0.8904 Precision=0.8602 AUC(approx)=0.9470
+
+-- Comparison: Logistic regression (Task 5 Model 2) on same split --
+
+[Logistic Regression (for comparison)]
+         Actual
+Predicted   No  Yes
+      No  3553  248
+      Yes  262 2696
+Accuracy=0.9245 Sensitivity=0.9158 Specificity=0.9313 Precision=0.9114 AUC(approx)=0.9825
+
+---------------------------------------------------------
+B. BAYESIAN LOGISTIC REGRESSION (arm::bayesglm)
+Weakly informative Cauchy(0, 2.5) prior on coefficients (Gelman et al. 2008)
+---------------------------------------------------------
+NOTE ON METHOD CHOICE: We first attempted full MCMC sampling via
+MCMCpack::MCMClogit. This FAILED - the Metropolis sampler achieved a
+0% acceptance rate regardless of proposal tuning, prior tightness, or
+subsample size. Diagnosis: our predictor set produces near-perfect
+class separation (consistent with Task 5's 92%+ accuracy using these
+same variables, and the recurring 'fitted probabilities numerically 0
+or 1' warning from glm() itself), which creates an extremely peaked
+likelihood surface that a basic random-walk Metropolis sampler cannot
+navigate.
+We therefore use arm::bayesglm, which implements exactly the published
+solution to this problem (Gelman, Jakulin, Pittau & Su, 2008): a
+weakly informative Cauchy prior that regularizes coefficients away from
+the separation boundary, using a fast approximate (EM-based) posterior
+mode estimate rather than full MCMC sampling.
+
+-- Bayesian GLM summary (posterior mode estimate under Cauchy prior) --
+
+Call:
+bayesglm(formula = anemia ~ age_at_test + sex + MCH + MCHC + 
+    MCV + PCV + RBC, family = binomial, data = train, prior.scale = 2.5, 
+    prior.df = 1)
+
+Coefficients:
+             Estimate Std. Error z value Pr(>|z|)    
+(Intercept) 73.528982   7.581088   9.699  < 2e-16 ***
+age_at_test  0.069887   0.001859  37.590  < 2e-16 ***
+sexMale      2.092252   0.079492  26.320  < 2e-16 ***
+MCH         -0.486465   0.221435  -2.197    0.028 *  
+MCHC        -1.226567   0.192198  -6.382 1.75e-10 ***
+MCV          0.348661   0.085940   4.057 4.97e-05 ***
+PCV         -1.755706   0.080545 -21.798  < 2e-16 ***
+RBC          2.678780   0.645243   4.152 3.30e-05 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 27779  on 20274  degrees of freedom
+Residual deviance:  6739  on 20267  degrees of freedom
+AIC: 6755
+
+Number of Fisher Scoring iterations: 16
+
+
+-- Comparison: Bayesian (Cauchy prior) vs. Frequentist MLE (Task 5 Model 2) --
+# A tibble: 8 × 5
+  term        frequentist_MLE frequentist_SE bayesian_posterior_mode bayesian_SE
+  <chr>                 <dbl>          <dbl>                   <dbl>       <dbl>
+1 (Intercept)         65.3           9.27                    73.5        7.58   
+2 age_at_test          0.0701        0.00187                  0.0699     0.00186
+3 sexMale              2.10          0.0797                   2.09       0.0795 
+4 MCH                 -0.706         0.274                   -0.486      0.221  
+5 MCHC                -1.04          0.236                   -1.23       0.192  
+6 MCV                  0.448         0.106                    0.349      0.0859 
+7 PCV                 -1.82          0.0871                  -1.76       0.0805 
+8 RBC                  3.19          0.699                    2.68       0.645  
+
+-- Predictive performance: Bayesian GLM (Cauchy prior) --
+
+[Bayesian Logistic Regression (Cauchy prior)]
+         Actual
+Predicted   No  Yes
+      No  3554  246
+      Yes  261 2698
+Accuracy=0.9250 Sensitivity=0.9164 Specificity=0.9316 Precision=0.9118 AUC(approx)=0.9825
+
+---------------------------------------------------------
+C. BAYESIAN DECISION MAKING: Expected-loss threshold analysis
+---------------------------------------------------------
+Standard 0.5 cutoff treats false negatives and false positives as
+equally costly. In a clinical screening context this is rarely true:
+missing a true anaemia case (false negative) delays treatment, while
+a false positive triggers an unnecessary but low-cost follow-up test.
+We illustrate Bayesian decision theory: choosing the threshold that
+minimizes EXPECTED LOSS given asymmetric costs, using the posterior
+predictive probabilities from Model B above.
+
+# A tibble: 37 × 7
+   threshold    FN    FP    TP    TN total_loss mean_loss
+       <dbl> <int> <int> <int> <int>      <dbl>     <dbl>
+ 1     0.05      9  1050  2935  2765       1095     0.162
+ 2     0.075    12   897  2932  2918        957     0.142
+ 3     0.1      15   819  2929  2996        894     0.132
+ 4     0.125    24   726  2920  3089        846     0.125
+ 5     0.15     34   658  2910  3157        828     0.123
+ 6     0.175    46   603  2898  3212        833     0.123
+ 7     0.2      58   558  2886  3257        848     0.125
+ 8     0.225    70   515  2874  3300        865     0.128
+ 9     0.25     82   478  2862  3337        888     0.131
+10     0.275    99   449  2845  3366        944     0.140
+11     0.3     109   419  2835  3396        964     0.143
+12     0.325   123   382  2821  3433        997     0.148
+13     0.35    142   358  2802  3457       1068     0.158
+14     0.375   158   343  2786  3472       1133     0.168
+15     0.4     176   317  2768  3498       1197     0.177
+16     0.425   195   308  2749  3507       1283     0.190
+17     0.45    212   294  2732  3521       1354     0.200
+18     0.475   226   278  2718  3537       1408     0.208
+19     0.5     246   261  2698  3554       1491     0.221
+20     0.525   266   241  2678  3574       1571     0.232
+21     0.55    282   226  2662  3589       1636     0.242
+22     0.575   314   201  2630  3614       1771     0.262
+23     0.6     332   186  2612  3629       1846     0.273
+24     0.625   359   175  2585  3640       1970     0.291
+25     0.65    392   159  2552  3656       2119     0.314
+26     0.675   416   138  2528  3677       2218     0.328
+27     0.7     434   118  2510  3697       2288     0.339
+28     0.725   458   101  2486  3714       2391     0.354
+29     0.75    496    85  2448  3730       2565     0.379
+30     0.775   530    69  2414  3746       2719     0.402
+31     0.8     571    61  2373  3754       2916     0.431
+32     0.825   610    55  2334  3760       3105     0.459
+33     0.85    646    44  2298  3771       3274     0.484
+34     0.875   713    34  2231  3781       3599     0.532
+35     0.9     790    24  2154  3791       3974     0.588
+36     0.925   876    12  2068  3803       4392     0.650
+37     0.95   1001     4  1943  3811       5009     0.741
+
+Default threshold (0.5): total loss = 1491
+Optimal threshold (minimizes expected loss, cost ratio FN:FP=5:1): 0.150, total loss = 828
+Loss reduction from threshold optimization: 44.5%

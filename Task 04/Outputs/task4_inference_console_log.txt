@@ -1,0 +1,225 @@
+=========================================================
+TASK 4: STATISTICAL INFERENCE - full console output
+=========================================================
+
+
+---------------------------------------------------------
+TEST A: Comparison of Means - HB by Sex (Welch two-sample t-test)
+---------------------------------------------------------
+H0: mean HB (Female) = mean HB (Male)
+H1: mean HB (Female) != mean HB (Male)
+
+# A tibble: 2 × 4
+  sex        n mean_HB sd_HB
+  <fct>  <int>   <dbl> <dbl>
+1 Female 15597    11.6  1.45
+2 Male   11437    13.3  1.93
+
+	Welch Two Sample t-test
+
+data:  HB by sex
+t = -76.823, df = 20293, p-value < 2.2e-16
+alternative hypothesis: true difference in means between group Female and group Male is not equal to 0
+95 percent confidence interval:
+ -1.693223 -1.608970
+sample estimates:
+mean in group Female   mean in group Male 
+            11.60796             13.25906 
+
+
+---------------------------------------------------------
+TEST B: Comparison of Means - HB: Women 18-39 vs Men 80+
+---------------------------------------------------------
+H0: mean HB (Female 18-39) = mean HB (Male 80+)
+H1: mean HB (Female 18-39) != mean HB (Male 80+)
+
+# A tibble: 2 × 4
+  grp                            n mean_HB sd_HB
+  <chr>                      <int>   <dbl> <dbl>
+1 18-39 (Young adult) Female  5783    11.8  1.36
+2 80+ (Elderly) Male           251    11.1  1.97
+
+	Welch Two Sample t-test
+
+data:  HB by grp
+t = 5.4646, df = 260.44, p-value = 1.085e-07
+alternative hypothesis: true difference in means between group 18-39 (Young adult) Female and group 80+ (Elderly) Male is not equal to 0
+95 percent confidence interval:
+ 0.4393445 0.9343384
+sample estimates:
+mean in group 18-39 (Young adult) Female         mean in group 80+ (Elderly) Male 
+                                11.82844                                 11.14159 
+
+
+---------------------------------------------------------
+TEST C: Comparison of Variances - HB across institutions
+---------------------------------------------------------
+H0: variance of HB is equal across all 4 institutions
+H1: variance of HB differs across at least one institution
+
+# A tibble: 4 × 4
+  institution       n var_HB sd_HB
+  <fct>         <int>  <dbl> <dbl>
+1 Institution_A   710   3.60  1.90
+2 Institution_B 17652   3.60  1.90
+3 Institution_C  2717   2.73  1.65
+4 Institution_D  5955   3.29  1.81
+
+-- Levene's test (robust to non-normality) --
+Levene's Test for Homogeneity of Variance (center = median)
+         Df F value    Pr(>F)    
+group     3  32.626 < 2.2e-16 ***
+      27030                      
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+-- Bartlett's test (classical, assumes normality) --
+
+	Bartlett test of homogeneity of variances
+
+data:  HB by institution
+Bartlett's K-squared = 90.822, df = 3, p-value < 2.2e-16
+
+
+---------------------------------------------------------
+TEST D: Comparison of Proportions - Anaemia: Female vs Male
+---------------------------------------------------------
+H0: proportion anaemic (Female) = proportion anaemic (Male)
+H1: proportion anaemic (Female) != proportion anaemic (Male)
+
+        
+           No  Yes
+  Female 7142 8455
+  Male   8099 3338
+# A tibble: 2 × 4
+  sex        n n_anemic  prop
+  <fct>  <int>    <int> <dbl>
+1 Female 15597     8455 0.542
+2 Male   11437     3338 0.292
+
+	2-sample test for equality of proportions with continuity correction
+
+data:  c(prop_D$n_anemic[prop_D$sex == "Female"], prop_D$n_anemic[prop_D$sex == "Male"]) out of c(prop_D$n[prop_D$sex == "Female"], prop_D$n[prop_D$sex == "Male"])
+X-squared = 1679, df = 1, p-value < 2.2e-16
+alternative hypothesis: two.sided
+95 percent confidence interval:
+ 0.2387298 0.2617336
+sample estimates:
+   prop 1    prop 2 
+0.5420914 0.2918598 
+
+
+---------------------------------------------------------
+TEST E: Comparison of Proportions - Anaemia across institutions (Chi-square)
+---------------------------------------------------------
+H0: anaemia status is independent of institution
+H1: anaemia status is NOT independent of institution (association exists)
+
+               
+                   No   Yes
+  Institution_A   387   323
+  Institution_B 10217  7435
+  Institution_C  1160  1557
+  Institution_D  3477  2478
+               
+                       No       Yes
+  Institution_A 0.5450704 0.4549296
+  Institution_B 0.5788013 0.4211987
+  Institution_C 0.4269415 0.5730585
+  Institution_D 0.5838791 0.4161209
+
+	Pearson's Chi-squared test
+
+data:  tab_E
+X-squared = 233.85, df = 3, p-value < 2.2e-16
+
+
+Expected counts:
+               
+                       No       Yes
+  Institution_A  400.2778  309.7222
+  Institution_B 9951.6953 7700.3047
+  Institution_C 1531.7673 1185.2327
+  Institution_D 3357.2596 2597.7404
+
+Standardized residuals (which cells drive the association):
+               
+                    No    Yes
+  Institution_A  -1.02   1.02
+  Institution_B   6.84  -6.84
+  Institution_C -15.16  15.16
+  Institution_D   3.54  -3.54
+
+Cramer's V (effect size): 0.093 
+
+---------------------------------------------------------
+TEST F: One-way ANOVA - HB across age groups
+---------------------------------------------------------
+H0: mean HB is equal across all age groups
+H1: at least one age group's mean HB differs
+
+# A tibble: 8 × 4
+  age_group               n mean_HB sd_HB
+  <fct>               <int>   <dbl> <dbl>
+1 0-4 (Child, U5)      2120    11.2  1.21
+2 5-11 (Child)         2004    12.1  1.18
+3 12-14 (Adolescent)    479    12.6  1.27
+4 15-17 (Adolescent)    671    12.9  1.77
+5 18-39 (Young adult)  9347    12.9  1.88
+6 40-59 (Middle-aged)  6707    12.4  1.91
+7 60-79 (Older adult)  5048    11.7  1.80
+8 80+ (Elderly)         658    11.0  1.77
+               Df Sum Sq Mean Sq F value Pr(>F)    
+age_group       7   8748  1249.7   398.1 <2e-16 ***
+Residuals   27026  84836     3.1                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+-- Effect size (eta squared) --
+Eta-squared: 0.0935 
+
+-- Post-hoc: Tukey HSD (pairwise comparisons) --
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = HB ~ age_group, data = df)
+
+$age_group
+                                               diff          lwr          upr     p adj
+5-11 (Child)-0-4 (Child, U5)             0.89943898  0.732133948  1.066744013 0.0000000
+12-14 (Adolescent)-0-4 (Child, U5)       1.36899020  1.097325059  1.640655345 0.0000000
+15-17 (Adolescent)-0-4 (Child, U5)       1.69790423  1.460046545  1.935761921 0.0000000
+18-39 (Young adult)-0-4 (Child, U5)      1.62186266  1.492685028  1.751040293 0.0000000
+40-59 (Middle-aged)-0-4 (Child, U5)      1.20637030  1.072574968  1.340165622 0.0000000
+60-79 (Older adult)-0-4 (Child, U5)      0.46238131  0.323405936  0.601356690 0.0000000
+80+ (Elderly)-0-4 (Child, U5)           -0.23481896 -0.474454768  0.004816843 0.0596264
+12-14 (Adolescent)-5-11 (Child)          0.46955122  0.196440839  0.742661603 0.0000052
+15-17 (Adolescent)-5-11 (Child)          0.79846525  0.558958237  1.037972269 0.0000000
+18-39 (Young adult)-5-11 (Child)         0.72242368  0.590233697  0.854613663 0.0000000
+40-59 (Middle-aged)-5-11 (Child)         0.30693131  0.170225351  0.443637278 0.0000000
+60-79 (Older adult)-5-11 (Child)        -0.43705767 -0.578837378 -0.295277957 0.0000000
+80+ (Elderly)-5-11 (Child)              -1.13425794 -1.375530922 -0.892984965 0.0000000
+15-17 (Adolescent)-12-14 (Adolescent)    0.32891403  0.007706020  0.650122043 0.0402637
+18-39 (Young adult)-12-14 (Adolescent)   0.25287246  0.001307025  0.504437893 0.0477372
+40-59 (Middle-aged)-12-14 (Adolescent)  -0.16261991 -0.416587417  0.091347604 0.5225863
+60-79 (Older adult)-12-14 (Adolescent)  -0.90660889 -1.163343114 -0.649874664 0.0000000
+80+ (Elderly)-12-14 (Adolescent)        -1.60380916 -1.926336103 -1.281282226 0.0000000
+18-39 (Young adult)-15-17 (Adolescent)  -0.07604157 -0.290656338  0.138573192 0.9622585
+40-59 (Middle-aged)-15-17 (Adolescent)  -0.49153394 -0.708959388 -0.274108488 0.0000000
+60-79 (Older adult)-15-17 (Adolescent)  -1.23552292 -1.456173758 -1.014872083 0.0000000
+80+ (Elderly)-15-17 (Adolescent)        -1.93272320 -2.227338124 -1.638108268 0.0000000
+40-59 (Middle-aged)-18-39 (Young adult) -0.41549237 -0.501424939 -0.329559791 0.0000000
+60-79 (Older adult)-18-39 (Young adult) -1.15948135 -1.253275660 -1.065687035 0.0000000
+80+ (Elderly)-18-39 (Young adult)       -1.85668162 -2.073265410 -1.640097836 0.0000000
+60-79 (Older adult)-40-59 (Middle-aged) -0.74398898 -0.844047475 -0.643930490 0.0000000
+80+ (Elderly)-40-59 (Middle-aged)       -1.44118926 -1.660558503 -1.221820013 0.0000000
+80+ (Elderly)-60-79 (Older adult)       -0.69720028 -0.919766741 -0.474633810 0.0000000
+
+
+-- ANOVA assumption check: residual normality (Shapiro on sample) --
+
+	Shapiro-Wilk normality test
+
+data:  resid_sample
+W = 0.99791, p-value = 2.696e-06
+

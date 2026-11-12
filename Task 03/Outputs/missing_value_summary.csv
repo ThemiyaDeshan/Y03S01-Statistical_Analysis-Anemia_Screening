@@ -1,0 +1,17 @@
+variable,n_missing,pct_missing
+case_id,0,0
+institution,0,0
+sex,0,0
+age_at_test,0,0
+birth_year,0,0
+bill_date,0,0
+HB,0,0
+MCH,0,0
+MCHC,0,0
+MCV,0,0
+PCV,0,0
+RBC,0,0
+who_hb_threshold,0,0
+anemia,0,0
+anemia_severity,0,0
+age_group,0,0
